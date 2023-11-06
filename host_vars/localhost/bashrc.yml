@@ -1,0 +1,155 @@
+my_bashrc: |
+
+  # ===============================
+  # General environment variables
+  # ===============================
+
+  # Set editor for oc commands
+  export EDITOR=/usr/bin/vim
+
+  # Set bash history size
+  export HISTSIZE=10000
+
+  # Set bash history timestamps
+  export HISTTIMEFORMAT="%F %T "
+
+  # Set pager not to clear on exit
+  export LESS='-X'
+
+  # Append to .bash_history
+  PROMPT_COMMAND="$PROMPT_COMMAND; history -a; history -n"
+
+  # =========================================
+  # OpenShift Training environment variables
+  # =========================================
+
+  # Source variables on new shell
+  if [ -e /usr/local/etc/ocp4.config ]
+    then
+      source /usr/local/etc/ocp4.config
+      # Set simpler variables for OCP classes
+      M=$RHT_OCP4_MASTER_API
+      WC=$RHT_OCP4_WILDCARD_DOMAIN
+      NS=$RHT_OCP4_NEXUS_SERVER
+      U=$RHT_OCP4_DEV_USER
+      P=$RHT_OCP4_DEV_PASSWORD
+      G=$RHT_OCP4_GITHUB_USER
+      Q=$RHT_OCP4_QUAY_USER
+  fi
+
+  # Set login aliases for OCP classes
+  alias lcl="oc login -u admin -p redhat https://api.ocp4.example.com:6443"
+  alias mcl="oc login -u admin -p redhat https://api.ocp4-mng.example.com:6443"
+  alias dl="oc login -u developer -p developer https://api.ocp4.example.com:6443"
+  alias al="oc login -u admin -p redhatocp https://api.ocp4.example.com:6443"
+
+  # Set clustercheck alias for OCP classes
+  alias clustercheck="ssh lab@utility ./wait.sh"
+
+  # ===============================
+  # Git bash environment variables
+  # ===============================
+
+  #source /usr/share/git-core/contrib/completion/git-prompt.sh
+  #export GIT_PS1_SHOWDIRTYSTATE=true
+  #export GIT_PS1_SHOWUNTRACKEDFILES=true
+
+  #git_ps1() {
+  #  local git_status="$(git status 2> /dev/null)"
+
+  #  if [[ $? -ne 0 ]]
+  #    then
+  #      echo ""
+  #      return
+  #  elif [[ $git_status =~ "nothing to commit" ]]
+  #    then
+  #      echo -e "\[\033[0;32m\]\$(__git_ps1 '(%s)')\[\033[0m\]"
+  #    else
+  #      echo -e "\[\033[0;31m\]\$(__git_ps1 '(%s)')\[\033[0m\]"
+  #  fi
+  #}
+
+  #export PROMPT_COMMAND='PS1="[\u@\h \W]$(git_ps1)\\\$ "'
+
+  export GIT_PAGER=/usr/bin/cat
+
+  # ===============================
+  # Ansible aliases (ansible-core)
+  # ===============================
+
+  alias ap="ansible-playbook"
+  alias apsc="ansible-playbook --syntax-check"
+  alias acd="ansible-config dump"
+  alias av="ansible --version"
+  alias aig="ansible-inventory --graph"
+
+  # =====================================
+  # Ansible aliases (ansible-navigator)
+  # =====================================
+
+  alias anr="ansible-navigator run -m stdout"
+  alias ansc="ansible-navigator run -m stdout --syntax-check"
+  alias anch="ansible-navigator run -m stdout --check"
+  alias ancd="ansible-navigator config dump -m stdout"
+  alias anv="ansible-navigator --version"
+  alias anig="ansible-navigator inventory --graph"
+
+  # ============
+  # Git aliases
+  # ============
+
+  alias gc="git commit -m"
+
+  # ================
+  # General aliases
+  # ================
+
+  # strip comments inside file (assume # is comment character)
+  alias decomment='egrep -v "^[[:space:]]*((#|;|//).*)?$" '
+
+  # stop using scp
+  alias scp='echo -e "\nStop using scp\n\nSee https://www.redhat.com/en/blog/openssh-scp-deprecation-rhel-9-what-you-need-know"'
+
+  # python virtual environments
+
+  # Create virtual environment
+  alias ve='python3 -m venv ./venv'
+
+  # Activate virtual environment
+  alias va='source ./venv/bin/activate'
+
+  # pastebin
+  alias pastebin="curl -F 'sprunge=<-' http://sprunge.us"
+
+  # ==========
+  # functions
+  # ==========
+
+  # make and change to directory
+  mcd (){
+    mkdir -pv "$1"
+    cd "$1" || return
+  }
+
+  # Show which block devices are mounted
+  mnt (){
+    mount | awk '$1 ~ /\/dev/ { print $1,$3; }' | column -t | sort ;
+  }
+
+  # create, switch to, push new git branch
+  gnb (){
+    git checkout -b "$1"
+    git push -u origin "$1"
+  }
+
+  my_ocp (){
+
+    echo 'M=$RHT_OCP4_MASTER_API' # api server
+    echo 'WC=$RHT_OCP4_WILDCARD_DOMAIN' # wildcard domain
+    echo 'NS=$RHT_OCP4_NEXUS_SERVER' # nexus server
+    echo 'U=$RHT_OCP4_DEV_USER' # developer user
+    echo 'P=$RHT_OCP4_DEV_PASSWORD' # developer password
+    echo 'G=$RHT_OCP4_GITHUB_USER' # your github account
+    echo 'Q=$RHT_OCP4_QUAY_USER' # your quay.io account
+
+  }

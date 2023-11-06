@@ -1,0 +1,31 @@
+set tabsize 2
+set tabstospaces
+set autoindent
+set trimblanks
+set linenumbers
+set constantshow
+set titlecolor white,red
+set keycolor cyan
+set functioncolor cyan
+set numbercolor yellow
+set mouse
+set softwrap
+
+syntax "YAML" "\.ya?ml$"
+header "^(---|===)" "%YAML"
+
+color magenta "^\s*[\$A-Za-z0-9_-]+\:"
+color brightmagenta "^\s*@[\$A-Za-z0-9_-]+\:"
+color white ":\s.+$"
+color brightcyan " (y|yes|n|no|true|false|on|off)$"
+color brightred " [[:digit:]]+(\.[[:digit:]]+)?"
+color red "\[" "\]" ":\s+[|>]" "^\s*- "
+color green "(^| )!!(binary|bool|float|int|map|null|omap|seq|set|str) "
+color brightwhite "#.*$"
+color ,red ":\w.+$"
+color ,red ":'.+$"
+color ,red ":".+$"
+color ,red "\s+$"
+color ,red "['\"][^['\"]]*$"
+color yellow "['\"].*['\"]"
+color brightgreen ":( |$)"

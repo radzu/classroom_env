@@ -1,0 +1,25 @@
+#!/bin/bash
+
+history_file=".bash_history"
+output_file="$HOME/.lab_history"
+
+> "$output_file"
+
+while IFS= read -r line; do
+    if [[ $line =~ ^#([0-9]+)$ ]]; then
+        timestamp=${BASH_REMATCH[1]} # Extract the timestamp in epoch
+    else
+        if [[ $line =~ ^(.*lab (start|finish).*) ]]; then
+            command=${BASH_REMATCH[1]}
+
+            timestamp_format=$(date -d "@$timestamp" +"%H:%M:%S")
+
+            echo "$timestamp_format $command" >> "$output_file"
+        fi
+    fi
+done < "$history_file"
+
+source /etc/rht
+
+curl -X POST -F '.lab_history=@.lab_history' -F "RHT_COURSE=$RHT_COURSE" http://lab-api.apps.ocp4.zero-effort.net/upload
+

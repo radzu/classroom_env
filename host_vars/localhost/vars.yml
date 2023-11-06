@@ -1,0 +1,54 @@
+dir_list:
+  - ~/.vim/autoload
+  - ~/.vim/bundle
+  - ~/.config/yamllint
+  - ~/bin
+
+repo_list:
+  - https://github.com/Yggdroot/indentLine.git
+  - https://github.com/pedrohdz/vim-yaml-folds.git
+  - https://github.com/dense-analysis/ale.git
+
+config_files:
+  vim:
+    file: vimrc
+    dest: ~/.vimrc
+
+  nano:
+    file: nanorc
+    dest: ~/.nanorc
+
+  yamllint:
+    file: config
+    dest: ~/.config/yamllint/config
+
+  tmux:
+    file: tmux.conf
+    dest: ~/.tmux.conf
+
+  monitor:
+    file: monitors.xml
+    dest: ~/.config/monitors.xml
+
+  terminal:
+    file: org.gnome.Terminal.desktop
+    dest: ~/.local/share/applications/org.gnome.Terminal.desktop
+
+  ansible-navigator:
+    file: ansible-navigator.yml
+    dest: ~/.ansible-navigator.yml
+
+other_files:
+  upload_timings:
+    file: upload_timings
+    dest: ~/bin/upload_timings
+    permissions: '0755'
+
+# Temp placeholder for a future feature 
+  feature:
+    file: placeholder
+    dest: /var/tmp
+
+regularfont_uuid: 5552A957-D588-4D0A-9DCD-735502C144E5
+mediumfont_uuid: 3B334A84-2F7F-485A-8456-1DD35E3191CD
+largefont_uuid: 32CF8900-5DAF-4B33-A747-127CA3EF6785

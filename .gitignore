@@ -1,0 +1,4 @@
+*.log
+*-artifact-*
+.*.swp
+ansible-navigator.log

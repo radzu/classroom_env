@@ -1,0 +1,119 @@
+- name: Setup editing environment
+  hosts: localhost
+  become: false
+  gather_facts: false
+
+  tasks:
+
+    - name: Check if user is logged in via GUI
+      register: login_type
+      changed_when: false
+      ansible.builtin.shell: "loginctl show-session $(loginctl --no-legend | awk '{print $1}') -p Type --value"
+
+    - name: Terminate playbook if user is not logged in via GUI
+      ansible.builtin.assert:
+        that: "'x11' in login_type['stdout']"
+        fail_msg: |
+          This playbook must be run from a console session at https://rol.redhat.com
+
+    - name: Determine course type
+      register: course_info
+      ansible.builtin.slurp:
+        src: /etc/rht
+
+    - name: Ensure needed python packages are installed
+      ansible.builtin.pip:
+        name: yamllint
+        state: present
+        extra_args: --user
+
+    - name: Ensure needed directories are present
+      loop: "{{ dir_list }}"
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+
+    - name: Ensure pathogen is downloaded
+      ansible.builtin.get_url:
+        url: https://tpo.pe/pathogen.vim
+        dest: ~/.vim/autoload/pathogen.vim
+
+    - name: Ensure plugin repos are cloned
+      loop: "{{ repo_list }}"
+      ansible.builtin.git:
+        repo: "{{ item }}"
+        dest: ~/.vim/bundle/{{ item.split('/')[-1] | regex_replace('\.git$') }}
+
+    - name: Render terminal profile template
+      notify: Ensure profile is loaded
+      ansible.builtin.template:
+        src: terminal_profile.j2
+        dest: /var/tmp/terminal_profile
+        mode: 0644
+
+    - name: Ensure config files are copied
+      loop: "{{ lookup('dict', config_files) }}"
+      notify: Ensure terminal terminates
+      ansible.builtin.copy:
+        src: "{{ item['value']['file'] }}"
+        dest: "{{ item['value']['dest'] }}"
+
+    - name: Ensure other file types are copied
+      loop: "{{ lookup('dict', other_files) }}"
+      ansible.builtin.copy:
+        src: "{{ item['value']['file'] }}"
+        dest: "{{ item['value']['dest'] }}"
+        mode: "{{ item['value']['permissions'] | default(omit) }}"
+
+    - name: Ensure ~/.bashrc is configured
+      ansible.builtin.blockinfile:
+        path: ~/.bashrc
+        block: "{{ my_bashrc }}"
+        state: present
+
+    - name: Ensure lab timings cronjob is enabled
+      ansible.builtin.cron:
+        name: "Send lab data to api"
+        minute: "0"
+        hour: "17"
+        job: ~/bin/upload_timings 
+
+#    - name: Remove ~/.ansible-navigator.yml
+#      when: > 
+        #'do374' in course_info['content'] | b64decode | join or
+        #'rh294' in course_info['content'] | b64decode | join
+        #      ansible.builtin.file:
+        #        path: ~/.ansible-navigator.yml
+        #        state: absent
+
+    - name: Ensure resolution is obtained
+      register: current_resolution
+      changed_when: false
+      ansible.builtin.command: xrandr
+
+    - name: Ensure resolution is set
+      when: "'current 1920 x 1080' not in current_resolution['stdout']"
+      ansible.builtin.command: xrandr --size 1920x1080
+
+    - name: Ensure firefox base directory exists
+      ansible.builtin.file:
+        state: directory
+        owner: student
+        group: student
+        mode: '0755'
+        path: ~/.mozilla/firefox
+
+    - name: Ensure Firefox profile is restored
+      ansible.builtin.unarchive:
+        src: firefox_profile.tar.xz
+        dest: ~/.mozilla/firefox
+
+
+  handlers:
+
+# community.general.dconf was considered but did not behave as expected
+    - name: Ensure profile is loaded
+      ansible.builtin.shell: dconf load /org/gnome/terminal/ < /var/tmp/terminal_profile
+
+    - name: Ensure terminal terminates
+      ansible.builtin.command: killall gnome-terminal-server
